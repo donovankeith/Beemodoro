@@ -9,6 +9,7 @@ TODO
 [X] Show Timer
 [ ] Start Timer
 [X] Count-down timer
+[ ] Single start/stop button
 [ ] Stop timer / Forfeit Timer
 [ ] Ding when complete
 [ ] Set goal / intention
@@ -34,10 +35,11 @@ class Beemodoro:
         self.mainframe = tkinter.Frame(self.master, bg="white")
         self.mainframe.pack(fill=tkinter.BOTH, expand=True)
 
-        self.time_left = DEFAULT_TIMER_LENGTH
+        self.time_left = tkinter.IntVar()
+        self.time_left.set(DEFAULT_TIMER_LENGTH)
 
         self.timer_text = tkinter.StringVar()
-        self.timer_text.set(self.MM_SS(self.time_left))
+        self.timer_text.set(self.MM_SS(self.time_left.get()))
 
         self.build_grid()
         self.build_timer()
@@ -112,6 +114,9 @@ class Beemodoro:
     def stop(self):
         print("stop")
 
+        self.time_left.set(DEFAULT_TIMER_LENGTH)
+        self.timer_text.set(self.MM_SS(self.time_left.get()))
+
         self.stop_button.config(state=tkinter.DISABLED)
         self.start_button.config(state=tkinter.NORMAL)
 
@@ -121,12 +126,12 @@ class Beemodoro:
         print("Update.")
 
         #Countdown the time
-        self.time_left -= 1
-        if self.time_left < 0:
-            self.time_left = 0
+        self.time_left.set(self.time_left.get() - 1)
+        if self.time_left.get() < 0:
+            self.time_left.set(0)
 
         #Update the timer text
-        self.timer_text.set(self.MM_SS(self.time_left))
+        self.timer_text.set(self.MM_SS(self.time_left.get()))
         self.build_timer()
 
         #Repeat every second
