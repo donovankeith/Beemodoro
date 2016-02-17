@@ -8,7 +8,7 @@ TODO
 
 [X] Show Timer
 [ ] Start Timer
-[ ] Count-down timer
+[X] Count-down timer
 [ ] Stop timer / Forfeit Timer
 [ ] Ding when complete
 [ ] Set goal / intention
@@ -20,6 +20,11 @@ import tkinter
 
 SECONDS_PER_MINUTE = 60
 DEFAULT_TIMER_LENGTH = 25 * SECONDS_PER_MINUTE
+DEFAULT_BREAK_LENGTH = 5 * SECONDS_PER_MINUTE
+
+#Temporarily Update
+DEFAULT_TIMER_LENGTH = 5
+DEFAULT_BREAK_LENGTH = 3
 
 class Beemodoro:
 
@@ -29,14 +34,18 @@ class Beemodoro:
         self.mainframe = tkinter.Frame(self.master, bg="white")
         self.mainframe.pack(fill=tkinter.BOTH, expand=True)
 
+        self.time_left = DEFAULT_TIMER_LENGTH
+
         self.timer_text = tkinter.StringVar()
-        self.timer_text.set(self.seconds_to_time_string(DEFAULT_TIMER_LENGTH))
+        self.timer_text.set(self.MM_SS(self.time_left))
 
         self.build_grid()
         self.build_timer()
 
-    def seconds_to_time_string(self, seconds):
-        """Converts 60 to '01:00' """
+        self.update()
+
+    def MM_SS(self, seconds):
+        """Converts 60 seconds to '01:00' """
 
         min = seconds // SECONDS_PER_MINUTE  # Integer division
         sec = seconds % SECONDS_PER_MINUTE  # Remainder
@@ -63,6 +72,23 @@ class Beemodoro:
             font=('Helvetica', 36)
         )
         timer.grid(row=1, column=0, sticky='nsew')
+
+    def update(self):
+        """Updates the timer every second."""
+
+        print("Update.")
+
+        #Countdown the time
+        self.time_left -= 1
+        if self.time_left < 0:
+            self.time_left = 0
+
+        #Update the timer text
+        self.timer_text.set(self.MM_SS(self.time_left))
+        self.build_timer()
+
+        #Repeat every second
+        self.master.after(1000, self.update)
 
 if __name__ == '__main__':
     root = tkinter.Tk() #Primary Dialog
