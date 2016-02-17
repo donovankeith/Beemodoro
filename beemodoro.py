@@ -41,6 +41,7 @@ class Beemodoro:
 
         self.build_grid()
         self.build_timer()
+        self.build_buttons()
 
         self.update()
 
@@ -72,6 +73,47 @@ class Beemodoro:
             font=('Helvetica', 36)
         )
         timer.grid(row=1, column=0, sticky='nsew')
+
+    def build_buttons(self):
+        """Adds [Start] [Stop] buttons to bottom row of mainframe."""
+
+        # Create a frame w/ two equally-sized columns for the buttons [  |  ]
+        buttons_frame = tkinter.Frame(self.mainframe)
+        buttons_frame.grid(row=2, column=0, sticky='nsew', pady=10)
+        buttons_frame.columnconfigure(0, weight=1)
+        buttons_frame.columnconfigure(1, weight=1)
+
+        # Create the Start/Stop buttons
+        self.start_button = tkinter.Button(
+            buttons_frame,
+            text='Start',
+            command=self.start
+        )
+
+        self.stop_button = tkinter.Button(
+            buttons_frame,
+            text='Stop',
+            command=self.stop
+        )
+
+        # Insert the buttons
+        self.start_button.grid(row=0, column=0, sticky='ew')
+        self.stop_button.grid(row=0, column=1, sticky='ew')
+
+        # Ensure Stop Button is disabled at the start.
+        self.stop_button.config(state=tkinter.DISABLED)
+
+    def start(self):
+        print("start")
+
+        self.start_button.config(state=tkinter.DISABLED)
+        self.stop_button.config(state=tkinter.NORMAL)
+
+    def stop(self):
+        print("stop")
+
+        self.stop_button.config(state=tkinter.DISABLED)
+        self.start_button.config(state=tkinter.NORMAL)
 
     def update(self):
         """Updates the timer every second."""
