@@ -27,6 +27,14 @@ DEFAULT_BREAK_LENGTH = 5 * SECONDS_PER_MINUTE
 DEFAULT_TIMER_LENGTH = 5
 DEFAULT_BREAK_LENGTH = 3
 
+#States
+STATE_RUNNING = 1
+STATE_STOPPED = 2
+
+#Modes
+MODE_TIMER = 1
+MODE_BREAK = 2
+
 class Beemodoro:
 
     def __init__(self, master):
@@ -34,6 +42,9 @@ class Beemodoro:
 
         self.mainframe = tkinter.Frame(self.master, bg="white")
         self.mainframe.pack(fill=tkinter.BOTH, expand=True)
+
+        self.state = STATE_STOPPED
+        self.mode = MODE_TIMER
 
         self.time_left = tkinter.IntVar()
         self.time_left.set(DEFAULT_TIMER_LENGTH)
@@ -79,46 +90,37 @@ class Beemodoro:
     def build_buttons(self):
         """Adds [Start] [Stop] buttons to bottom row of mainframe."""
 
-        # Create a frame w/ two equally-sized columns for the buttons [  |  ]
-        buttons_frame = tkinter.Frame(self.mainframe)
-        buttons_frame.grid(row=2, column=0, sticky='nsew', pady=10)
-        buttons_frame.columnconfigure(0, weight=1)
-        buttons_frame.columnconfigure(1, weight=1)
-
         # Create the Start/Stop buttons
-        self.start_button = tkinter.Button(
-            buttons_frame,
+        self.start_stop_button = tkinter.Button(
+            self.mainframe,
             text='Start',
-            command=self.start
-        )
-
-        self.stop_button = tkinter.Button(
-            buttons_frame,
-            text='Stop',
-            command=self.stop
+            command=self.start_stop
         )
 
         # Insert the buttons
-        self.start_button.grid(row=0, column=0, sticky='ew')
-        self.stop_button.grid(row=0, column=1, sticky='ew')
+        self.start_stop_button.grid(row=2, column=0, sticky='s')
 
-        # Ensure Stop Button is disabled at the start.
-        self.stop_button.config(state=tkinter.DISABLED)
+    def start_stop(self):
+        """
+        States:
+        Just opened, nothing started.
+        Timer running
+        Timer Paused
+        Timer stopped (restart)
+        Break running
+        Break paused
+        Break stopped
+        Set next task
+        """
 
-    def start(self):
-        print("start")
-
-        self.start_button.config(state=tkinter.DISABLED)
-        self.stop_button.config(state=tkinter.NORMAL)
-
-    def stop(self):
-        print("stop")
-
-        self.time_left.set(DEFAULT_TIMER_LENGTH)
-        self.timer_text.set(self.MM_SS(self.time_left.get()))
-
-        self.stop_button.config(state=tkinter.DISABLED)
-        self.start_button.config(state=tkinter.NORMAL)
+        if self.state == STATE_STOPPED:
+            print("Start!")
+            self.state = STATE_RUNNING
+            self.start_stop_button.config(text="Stop")
+        elif self.state == STATE_RUNNING:
+            print("Stop!")
+            self.state = STATE_STOPPED
+            self.start_stop_button.config(text="Start")
 
     def update(self):
         """Updates the timer every second."""
