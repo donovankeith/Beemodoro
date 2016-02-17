@@ -7,8 +7,8 @@ Author: Donovan Keith
 import tkinter
 from tkinter import messagebox
 
-DEFAULT_GAP = 60 * 25  # 25 minutes
-DEFAULT_GAP = 5
+DEFAULT_TIMER_LENGTH = 60 * 25  # 25 minutes
+DEFAULT_TIMER_LENGTH = 5
 
 
 class Pymodoro:
@@ -18,6 +18,7 @@ class Pymodoro:
         :return:
         """
 
+        # Dialog Variables
         self.master = master
         self.mainframe = tkinter.Frame(self.master, bg="white")
         self.mainframe.pack(fill=tkinter.BOTH, expand=True)
@@ -27,10 +28,12 @@ class Pymodoro:
         self.timer_text.trace('w', self.build_timer) #Whenever this is written to, call build_timer
 
         self.time_left = tkinter.IntVar()  # Number of seconds left.
-        self.time_left.set(DEFAULT_GAP)
+        self.time_left.set(DEFAULT_TIMER_LENGTH)
         self.time_left.trace('w', self.alert)
-        self.running = False
 
+        self.timer_running = False
+
+        # Create the Layout
         self.build_grid()
         self.build_banner()
         self.build_buttons()
@@ -100,6 +103,8 @@ class Pymodoro:
         self.stop_button.config(state=tkinter.DISABLED)
 
     def build_timer(self, *args):
+        """Draw timer on Screen
+        """
         timer = tkinter.Label(
             self.mainframe,
             text=self.timer_text.get(),
@@ -110,8 +115,8 @@ class Pymodoro:
     def start_timer(self):
         """Starts the timer."""
 
-        self.time_left.set(DEFAULT_GAP)
-        self.running = True
+        self.time_left.set(DEFAULT_TIMER_LENGTH)
+        self.timer_running = True
 
         self.stop_button.config(state=tkinter.NORMAL)
         self.start_button.config(state=tkinter.DISABLED)
@@ -119,40 +124,36 @@ class Pymodoro:
     def stop_timer(self):
         """Stops the timer."""
 
-        self.running = False
+        self.timer_running = False
 
         self.stop_button.config(state=tkinter.DISABLED)
         self.start_button.config(state=tkinter.NORMAL)
 
     def minutes_seconds(self, seconds):
+        """Converts seconds to a minutes/seconds string."""
+
         min, sec = int(seconds / 60), int(seconds % 60)
 
-        #return '{:0>2}:{:0>2}'.format(min, sec)
-
-        return "TEST"
+        return '{:0>2}:{:0>2}'.format(min, sec)
 
     def alert(self, *args):
         if not self.time_left.get():
-            messagebox.showinfo('Timer done!', 'Your timer is done!')
-
-    def minutes_seconds(self, seconds):
-        return int(seconds/60), int(seconds%60)
+            messagebox.showinfo('Beemodoro', 'Your timer is done!')
 
     def update(self):
         time_left = self.time_left.get()
 
-        if self.running and time_left:
-            minutes, seconds = self.minutes_seconds(time_left)
-            self.timer_text.set(
-                '{:0>2}:{:0>2}'.format(minutes, seconds)
-            )
+        if self.timer_running and time_left:
             self.time_left.set(time_left-1)
-        else:
-            minutes, seconds = self.minutes_seconds(DEFAULT_GAP)
             self.timer_text.set(
-                '{:0>2}:{:0>2}'.format(minutes, seconds)
+                self.minutes_seconds(time_left)
             )
+        else:
             self.stop_timer()
+            self.timer_text.set(
+                self.minutes_seconds(DEFAULT_TIMER_LENGTH)
+            )
+
         self.master.after(1000, self.update)
 
 # Only create dialog if it's being run as it's own script
