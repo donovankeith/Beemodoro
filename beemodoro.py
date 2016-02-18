@@ -19,6 +19,7 @@ TODO
 
 import tkinter
 
+
 SECONDS_PER_MINUTE = 60
 DEFAULT_TIMER_LENGTH = 25 * SECONDS_PER_MINUTE
 DEFAULT_BREAK_LENGTH = 5 * SECONDS_PER_MINUTE
@@ -31,10 +32,6 @@ DEFAULT_BREAK_LENGTH = 3
 STATE_RUNNING = 1
 STATE_STOPPED = 2
 
-#Modes
-MODE_TIMER = 1
-MODE_BREAK = 2
-
 class Beemodoro:
 
     def __init__(self, master):
@@ -44,7 +41,6 @@ class Beemodoro:
         self.mainframe.pack(fill=tkinter.BOTH, expand=True)
 
         self.state = STATE_STOPPED
-        self.mode = MODE_TIMER
 
         self.time_left = tkinter.IntVar()
         self.time_left.set(DEFAULT_TIMER_LENGTH)
@@ -53,10 +49,11 @@ class Beemodoro:
         self.timer_text.set(self.MM_SS(self.time_left.get()))
 
         self.build_grid()
+        self.build_banner()
         self.build_timer()
         self.build_buttons()
 
-        self.update()
+        self.update_timer()
 
     def MM_SS(self, seconds):
         """Converts 60 seconds to '01:00' """
@@ -78,6 +75,25 @@ class Beemodoro:
         self.mainframe.rowconfigure(0, weight=0)
         self.mainframe.rowconfigure(1, weight=1)
         self.mainframe.rowconfigure(2, weight=0)
+
+    def build_banner(self):
+        """Adds a red 'Beemodoro' banner at the top of the window."""
+
+        banner = tkinter.Label(
+            self.mainframe,
+            background='red',
+            text='Beemodoro',
+            fg='white',
+            font=('Helvetica', 24)
+        )
+
+        banner.grid(
+            row=0,
+            column=0,
+            sticky='ew',  # East / West
+            padx=10,
+            pady=10
+        )
 
     def build_timer(self):
         timer = tkinter.Label(
@@ -107,37 +123,45 @@ class Beemodoro:
         Timer running
         Timer Paused
         Timer stopped (restart)
-        Break running
-        Break paused
-        Break stopped
         Set next task
         """
 
+        # Stopped -> Start
         if self.state == STATE_STOPPED:
             print("Start!")
             self.state = STATE_RUNNING
             self.start_stop_button.config(text="Stop")
+            self.update_timer()
+
+        # Running -> Stopped
         elif self.state == STATE_RUNNING:
             print("Stop!")
             self.state = STATE_STOPPED
             self.start_stop_button.config(text="Start")
+            self.time_left.set(DEFAULT_TIMER_LENGTH)
+            self.update_timer()
 
-    def update(self):
+    def update_timer(self):
         """Updates the timer every second."""
 
-        print("Update.")
-
-        #Countdown the time
-        self.time_left.set(self.time_left.get() - 1)
-        if self.time_left.get() < 0:
-            self.time_left.set(0)
+        print("update_timer")
 
         #Update the timer text
         self.timer_text.set(self.MM_SS(self.time_left.get()))
         self.build_timer()
 
+        if self.state == STATE_STOPPED:
+            return
+
+        #Countdown the time
+        self.time_left.set(self.time_left.get() - 1)
+        if self.time_left.get() < 0:
+            self.time_left.set(0)
+        if self.time_left.get() == 0:
+            self.state = STATE_STOPPED
+            print('\a') #Alarm sound
         #Repeat every second
-        self.master.after(1000, self.update)
+        self.master.after(1000, self.update_timer)
 
 if __name__ == '__main__':
     root = tkinter.Tk() #Primary Dialog
