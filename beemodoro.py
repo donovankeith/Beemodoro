@@ -18,6 +18,7 @@ TODO
 """
 
 import tkinter
+from tkinter import messagebox
 
 
 SECONDS_PER_MINUTE = 60
@@ -141,6 +142,10 @@ class Beemodoro:
             self.time_left.set(DEFAULT_TIMER_LENGTH)
             self.update_timer()
 
+    def alert(self, *args):
+        if not self.time_left.get():
+            messagebox.showinfo('Beemodoro', 'Your timer is done!')
+
     def update_timer(self):
         """Updates the timer every second."""
 
@@ -159,7 +164,8 @@ class Beemodoro:
             self.time_left.set(0)
         if self.time_left.get() == 0:
             self.state = STATE_STOPPED
-            print('\a') #Alarm sound
+            self.alert()
+
         #Repeat every second
         self.master.after(1000, self.update_timer)
 
